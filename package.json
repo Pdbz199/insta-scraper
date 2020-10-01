@@ -1,0 +1,16 @@
+{
+  "name": "insta-scrapper",
+  "version": "1.0.0",
+  "description": "A public Instagram page scraper. It collects all videos and images from a specified page.",
+  "main": "scrape.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Preston Rozwood",
+  "license": "MIT",
+  "dependencies": {
+    "playwright": "^1.4.2",
+    "requestify": "^0.2.5",
+    "uuid": "^8.3.0"
+  }
+}
