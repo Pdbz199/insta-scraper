@@ -23,7 +23,8 @@ function collectArg(arg, def) {
 
 let username = collectArg('username', 'babybluebois')
 const instaUrl = `https://www.instagram.com/${username}`
-const localPath = collectArg('path')
+let localPath = collectArg('path')
+if (localPath.endsWith('\\')) localPath = localPath.substring(0, localPath.length-1)
 const clearPath = Boolean(collectArg('clear', 'false'))
 if (clearPath) {
     fs.readdir(localPath, (err, files) => {
@@ -46,7 +47,7 @@ const addToList = (list, elts) => {
 }
 
 const https = require('https')
-const { getuid } = require('process')
+const { getuid, exit } = require('process')
 //Node.js Function to save image from External URL.
 function saveImageToDisk(url, localPath) {
     var fullUrl = url
@@ -56,7 +57,7 @@ function saveImageToDisk(url, localPath) {
     })
 }
 
-const collectPost = async (page, link) => {
+const collectPost = async (page, link, index) => {
     let isVideo = true
     await page.goto(link)
 
@@ -88,7 +89,9 @@ const collectPost = async (page, link) => {
 
     srcs = srcs.filter(elt => elt !== '')
 
-    srcs.forEach(src => saveImageToDisk(src, localPath + uuidv4() + (isVideo ? '.mp4' : '.jpg')))
+    srcs.forEach((src, ind) => {
+        saveImageToDisk(src, `${localPath}\\${index}(${ind+1}).${isVideo ? 'mp4' : 'jpg'}`)
+    })
 }
 
 (async () => {
@@ -96,13 +99,17 @@ const collectPost = async (page, link) => {
     const page = await browser.newPage()
 
     await page.goto(instaUrl)
+    await page.waitForLoadState('domcontentloaded');
+    // (await page.$('footer')).scrollIntoViewIfNeeded()
+    // await page.waitForLoadState('domcontentloaded');
+    // await page.screenshot({path: 'poop.png', fullPage: true})
 
     const links = await page.$$eval('div.v1Nh3.kIKUG._bz0w > a', elements => {
         return elements.map(elt => elt.href)
     })
 
     for (let i = 0; i < links.length; i++)
-        await collectPost(page, links[i])
+        await collectPost(page, links[i], links.length-i)
 
     await browser.close()
 })()
